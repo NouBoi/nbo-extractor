@@ -1,0 +1,34 @@
+name: OFP Decrypter by Area69Labs
+
+on:
+  workflow_dispatch:
+    inputs:
+      ofp_link:
+        description: 'OFP Firmaware Link'
+env:
+  NBO_LINK: https://bot2.atharv2951.workers.dev/0:/PLE-3320-0-00WW-A02_3%2BNokia%2B6.7z
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@main
+
+      - name: Download OFP Firmware
+        run: |
+          wget $NBO_LINK
+      - name: Prepare Decrypter and Decrypt OFP
+        run: |
+          sudo apt-fast update -qqy
+          sudo apt-fast install -qqy openssl rsync sshpass
+          sudo pip3 install --upgrade pip wheel setuptools
+          sudo pip3 install --upgrade pycryptodome
+          git clone git clone --recurse-submodules https://github.com/HikariCalyx/Firmware_extractor.git
+          ./extractor.sh *.7z
+      - name: Compress & Upload Decrypted Zip
+        run: |
+          zip -r9 Decrypted.zip Firmware_extractor/out
+          curl -sL https://git.io/file-transfer | sh 
+          ./transfer wet *.zip
